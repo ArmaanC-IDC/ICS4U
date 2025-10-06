@@ -108,20 +108,26 @@ while (true) {
         let year = getNumberInput("When was it published? ", 0, 2025);
         addBook(title, author, year);
     } else if (input===2) {
+        console.log("-----------------------------------------------")
         listAvailableBooks();
     } else if (input===3){
+        console.log("-----------------------------------------------")
         let title = prompt("What book would you like to borrow? ");
         borrowBook(title);
     } else if (input===4) {
+        console.log("-----------------------------------------------")
         let title = prompt("What book would you like to return? ");
         returnBook(title);
     } else if (input===5) {
+        console.log("-----------------------------------------------")
         let author = prompt("What author's books would you like listed? ");
         listBooksByAuthor(author);
     } else if (input===6) {
+        console.log("-----------------------------------------------")
         let year = getNumberInput("What year would you like to get books before? ", 0, 2025);
         listBooksBeforeYear(year);
     } else if (input===7) {
+        console.log("-----------------------------------------------")
         let title = prompt("What book would you like to remove? ");
         removeBook(title);
     }
