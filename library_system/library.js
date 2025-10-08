@@ -24,6 +24,7 @@ function borrowBook(title) {
         if (book.title.toLowerCase()===title) {
             if (book.isAvailable){
                 book.isAvailable = false;
+                console.log(`You borrowed ${book.title}`)
             }else{
                 console.log("That book is not available");
             }
@@ -37,15 +38,22 @@ function borrowBook(title) {
 }
 
 function returnBook(title){
+    let found = false;
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
         if (book.title.toLowerCase()===title) {
+            found = true;
             if (!book.isAvailable) {
                 console.log("That book is not checked out");
             }
-            book.isAvailable = true;
+            else{
+                book.isAvailable = true;
+                console.log(`You returned ${book.title}`)
+            }
+
         }
     }
+    console.log(`Book with title ${title} was not found`);
 }
 
 function listBooksByAuthor(author){
@@ -76,13 +84,17 @@ function removeBook(title){
             index = i;
         }
     }
-
-    books.splice(index, 1);
+    
+    if (index>0){    
+        books.splice(index, 1);
+    } else {
+        console.log(`Book with title ${title} was not found`);
+    }
 }
 
 function getNumberInput (inputString, minVal = Number.MIN_SAFE_INTEGER, maxVal = Number.MAX_SAFE_INTEGER) {
     let input = Number(prompt(inputString));
-    while (isNaN(input) || input>maxVal | input<minVal) {
+    while (isNaN(input) || input>maxVal || input<minVal) {
         console.log("Invalid number. Please enter again");
         input = Number(prompt(inputString));
     }
