@@ -21,7 +21,7 @@ function borrowBook(title) {
     let found = false;
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
-        if (book.title===title) {
+        if (book.title.toLowerCase()===title) {
             if (book.isAvailable){
                 book.isAvailable = false;
             }else{
@@ -39,7 +39,10 @@ function borrowBook(title) {
 function returnBook(title){
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
-        if (book.title===title) {
+        if (book.title.toLowerCase()===title) {
+            if (!book.isAvailable) {
+                console.log("That book is not checked out");
+            }
             book.isAvailable = true;
         }
     }
@@ -49,7 +52,7 @@ function listBooksByAuthor(author){
     console.log(`Books by ${author}: `)
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
-        if (book.author===author){
+        if (book.author.toLowerCase()===author){
             console.log(` - ${book.title}`);
         }
     }
@@ -69,7 +72,7 @@ function removeBook(title){
     let index = -1;
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
-        if (book.title===title){
+        if (book.title.toLowerCase()===title){
             index = i;
         }
     }
@@ -112,15 +115,15 @@ while (true) {
         listAvailableBooks();
     } else if (input===3){
         console.log("-----------------------------------------------")
-        let title = prompt("What book would you like to borrow? ");
+        let title = prompt("What book would you like to borrow? ").toLowerCase();
         borrowBook(title);
     } else if (input===4) {
         console.log("-----------------------------------------------")
-        let title = prompt("What book would you like to return? ");
+        let title = prompt("What book would you like to return? ").toLowerCase();
         returnBook(title);
     } else if (input===5) {
         console.log("-----------------------------------------------")
-        let author = prompt("What author's books would you like listed? ");
+        let author = prompt("What author's books would you like listed? ").toLowerCase();
         listBooksByAuthor(author);
     } else if (input===6) {
         console.log("-----------------------------------------------")
@@ -128,7 +131,7 @@ while (true) {
         listBooksBeforeYear(year);
     } else if (input===7) {
         console.log("-----------------------------------------------")
-        let title = prompt("What book would you like to remove? ");
+        let title = prompt("What book would you like to remove? ").toLowerCase();
         removeBook(title);
     }
     else if (input===8){
