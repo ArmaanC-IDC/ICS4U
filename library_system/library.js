@@ -43,7 +43,7 @@ function returnBook(title){
         let book = books[i];
         if (book.title.toLowerCase()===title) {
             found = true;
-            if (!book.isAvailable) {
+            if (book.isAvailable) {
                 console.log("That book is not checked out");
             }
             else{
@@ -53,7 +53,9 @@ function returnBook(title){
 
         }
     }
-    console.log(`Book with title ${title} was not found`);
+    if (!found){
+        console.log(`Book with title ${title} was not found`);
+    }
 }
 
 function listBooksByAuthor(author){
@@ -71,7 +73,7 @@ function listBooksBeforeYear(year){
     for (let i = 0; i<books.length; i++) {
         let book = books[i];
         if (book.year<year){
-            console.log(` - ${title}`);
+            console.log(` - ${book.title}`);
         }
     }
 }
