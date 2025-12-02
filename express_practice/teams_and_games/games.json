@@ -1,0 +1,24 @@
+[
+  {
+    "id": 2,
+    "homeTeamId": 1,
+    "awayTeamId": 3,
+    "date": "2025-03-01",
+    "time": "16:00",
+    "location": "Bayview Glen Gym",
+    "homeScore": 0,
+    "awayScore": 0,
+    "notes": "Playoff game, score not entered yet."
+  },
+  {
+    "id": 3,
+    "homeTeamId": 1,
+    "awayTeamId": 3,
+    "date": "2025-03-01",
+    "time": "16:00",
+    "location": "Bayview Glen Gym",
+    "homeScore": 0,
+    "awayScore": 0,
+    "notes": "Playoff game, score not entered yet."
+  }
+]
