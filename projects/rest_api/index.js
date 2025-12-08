@@ -34,10 +34,10 @@ const studentsData = loadJson(studentsFilePath);
 const testsData = loadJson(testsFilePath);
 const coursesData = loadJson(coursesFilePath);
 
-let nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -Infinity) + 1;
-let nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -Infinity) + 1;
-let nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -Infinity) + 1;
-let nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -Infinity) + 1;
+let nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+let nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+let nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+let nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
 
 //teachers routes
 //get all teachers
@@ -59,6 +59,10 @@ app.post("/teachers", (req, res) => {
     if (!firstName || !lastName || !email || !department) 
         return res.status(400).json({ error: "Missing required fields" });
 
+    if (email && teachersData.some(t => t.email===email)){
+        return res.status(400).json({ error: "Teacher with this email already exists" });
+    }
+
     const newTeacher = {
         id: nextTeacherId++,
         firstName,
@@ -70,7 +74,7 @@ app.post("/teachers", (req, res) => {
 
     teachersData.push(newTeacher);
     saveJson(teachersFilePath, teachersData);
-    res.status(201).json(newTeacher);
+    return res.status(201).json(newTeacher);
 });
 
 //update teacher
@@ -129,6 +133,10 @@ app.post("/courses", (req, res) => {
     const { code, name, teacherId, semester, room, schedule } = req.body;
     if (!code || !name || !teacherId || !semester || !room){
         return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (teacherId && !teachersData.some(t => t.id===teacherId)){
+        return res.status(400).json({ error: "Invalid teacher id" })
     }
 
     //schedule is not required. if not provided, defaults to empty array
@@ -212,7 +220,7 @@ app.get("/students/:id", (req, res) => {
 app.post("/students", (req, res) => {
     const { firstName, lastName, grade, studentNumber, homeroom, courses } = req.body || {};
     if (!firstName || !lastName || !grade || !studentNumber){
-        res.status(400).json({ error: "Missing required fields "});
+        return res.status(400).json({ error: "Missing required fields "});
     }
 
     const newStudent = {
@@ -227,7 +235,7 @@ app.post("/students", (req, res) => {
 
     studentsData.push(newStudent);
     saveJson(studentsFilePath, studentsData);
-    return res.status(200).json(newStudent);
+    return res.status(201).json(newStudent);
 });
 
 //update student
@@ -256,6 +264,11 @@ app.delete("/students/:id", (req, res) => {
 
     const index = studentsData.findIndex(s => s.id===id);
     if (index===-1) return res.status(404).json({ error: "Student not found" });
+
+    if (testsData.some(t => t.studentId===id)){
+        return res.status(400).json({ error: "Tests exist for that student" });
+    }
+
     const deleted = studentsData.splice(index, 1)[0];
     saveJson(studentsFilePath, studentsData);
     res.status(200).json(deleted);
@@ -280,6 +293,14 @@ app.post("/tests", (req, res) => {
     const { studentId, courseId, testName, date, mark, outOf, weight } = req.body;
     if (!studentId || !courseId || !testName || !date || !mark || !outOf) 
         return res.status(400).json({ error: "Missing required fields" });
+
+    if (studentId && !studentsData.some(s => s.id===studentId)){
+        return res.status(400).json({ error: "Invalid student id" });
+    }
+
+     if (courseId && !coursesData.some(c => c.id===courseId)){
+        return res.status(400).json({ error: "Invalid course id" });
+    }
 
     const newTest = {
         id: nextTestId++,
@@ -310,7 +331,15 @@ app.put("/tests/:id", (req, res) => {
         return res.status(404).json({ error: "Test not found" });
     }
 
-    ["studentID", "courseId", "testName", "date", "mark", "outOf", "weight"].forEach(param => {
+    if (studentId && !studentsData.some(s => s.id===studentId)){
+        return res.status(400).json({ error: "Invalid student id" });
+    }
+
+    if (courseId && !coursesData.some(c => c.id===courseId)){
+        return res.status(400).json({ error: "Invalid course id" });
+    }
+
+    ["studentId", "courseId", "testName", "date", "mark", "outOf", "weight"].forEach(param => {
         testsData[index][param] = req.body[param] || testsData[index][param];
     });
     saveJson(testsFilePath, testsData);
@@ -341,20 +370,20 @@ app.get("/students/:id/tests", (req, res) => {
     }
     const tests = testsData.filter(t => t.studentId===student.id);
     if (tests.length===0){
-        return res.status(400).json({ error: "No tests written by that student" });
+        return res.status(204);
     }
     return res.status(200).json(tests);
 });
 
 app.get("/students/:id/average", (req, res) => {
-     const id = Number(req.params.id);
+    const id = Number(req.params.id);
     const student = studentsData.find(s => s.id===id);
     if (!student){
         return res.status(404).json({ error: "Student not found" });
     }
     const tests = testsData.filter(t => t.studentId===student.id);
     if (tests.length===0){
-        return res.status(400).json({ error: "No tests written by that student" });
+        return res.status(204);
     }
 
     //determine averages by:
@@ -380,7 +409,7 @@ app.get("/courses/:id/tests", (req, res) => {
 
     const tests = testsData.filter(t => t.courseId===id);
     if (tests.length===0)
-        return tests.status(400).json({ error: "No tests found for that course" });
+        return res.status(204);
 
     return res.status(200).json(tests);
 });
@@ -393,7 +422,7 @@ app.get("/courses/:id/average", (req, res) => {
 
     const tests = testsData.filter(t => t.courseId===id);
     if (tests.length===0)
-        return tests.status(400).json({ error: "No tests found for that course" });
+        return res.status(204);
 
     return res.status(200).json(
         Math.round(
