@@ -7,9 +7,15 @@ const uri = "mongodb+srv://user:abcdefg@schoolapi.g7m289e.mongodb.net/?appName=S
 const app = express();
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 let db;
 
 const loadJson = async (collectionName) => {
