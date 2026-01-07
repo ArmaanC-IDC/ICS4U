@@ -38,29 +38,6 @@ let studentsData;
 let testsData;
 let coursesData;
 
-async function startServer() {
-    await client.connect();
-    console.log("Connected to MongoDB");
-
-    db = client.db("SchoolAPI");
-
-    teachersData = await loadJson(teachersCollectionName);
-    studentsData = await loadJson(studentsCollectionName);
-    testsData = await loadJson(testsCollectionName);
-    coursesData = await loadJson(coursesCollectionName);
-
-    nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-    nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-    nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-    nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-
-    app.listen(PORT, () => {
-        console.log(`Server listening on http://localhost:${PORT}`);
-    });
-}
-
-await startServer().catch(console.error);
-
 //teachers routes
 //get all teachers
 app.get("/teachers", async (req, res) => {
@@ -472,3 +449,26 @@ app.get("/teachers/:id/summary", async (req, res) => {
             }})
     }); 
 });
+
+async function startServer() {
+    await client.connect();
+    console.log("Connected to MongoDB");
+
+    db = client.db("SchoolAPI");
+
+    teachersData = await loadJson(teachersCollectionName);
+    studentsData = await loadJson(studentsCollectionName);
+    testsData = await loadJson(testsCollectionName);
+    coursesData = await loadJson(coursesCollectionName);
+
+    nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+
+    app.listen(PORT, () => {
+        console.log(`Server listening on http://localhost:${PORT}`);
+    });
+}
+
+await startServer().catch(console.error);
