@@ -1,52 +1,74 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-const app = express();
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
+const uri = "mongodb+srv://user:abcdefg@schoolapi.g7m289e.mongodb.net/?appName=SchoolAPI";
+const app = express();
 app.use(express.json());
 
 const PORT = 3000;
 
-const loadJson = (filePath) => {
-    if (!fs.existsSync(filePath)) return [];
+const client = new MongoClient(uri);
+let db;
 
-    const data = fs.readFileSync(filePath, "utf-8");
-
-    try {
-        return JSON.parse(data);
-    }catch (err) {
-        console.error("Error parsing data: ", err);
-        return [];
-    }
+const loadJson = async (collectionName) => {
+    return await db.collection(collectionName).find({}).toArray();
 }
 
-const saveJson = (filePath, data) => {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+const saveJson = async (collectionName, data) => {
+    console.log(collectionName, data);
+    const collection = db.collection(collectionName);
+    await collection.deleteMany({});
+    await collection.insertMany(data);
 }
 
-const teachersFilePath = "./json_data/teachers.json";
-const studentsFilePath = "./json_data/students.json";
-const testsFilePath = "./json_data/tests.json";
-const coursesFilePath = "./json_data/courses.json";
+const teachersCollectionName = "teachers";
+const studentsCollectionName = "students";
+const testsCollectionName = "tests";
+const coursesCollectionName = "courses";
 
-const teachersData = loadJson(teachersFilePath);
-const studentsData = loadJson(studentsFilePath);
-const testsData = loadJson(testsFilePath);
-const coursesData = loadJson(coursesFilePath);
+let nextTeacherId;
+let nextStudentId;
+let nextTestId;
+let nextCourseId;
 
-let nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-let nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-let nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
-let nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+let teachersData;
+let studentsData;
+let testsData;
+let coursesData;
+
+async function startServer() {
+    await client.connect();
+    console.log("Connected to MongoDB");
+
+    db = client.db("SchoolAPI");
+
+    teachersData = await loadJson(teachersCollectionName);
+    studentsData = await loadJson(studentsCollectionName);
+    testsData = await loadJson(testsCollectionName);
+    coursesData = await loadJson(coursesCollectionName);
+
+    nextTeacherId = teachersData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextStudentId = studentsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextTestId = testsData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+    nextCourseId = coursesData.reduce((max, current) => Math.max(max, current.id), -1) + 1;
+
+    app.listen(PORT, () => {
+        console.log(`Server listening on http://localhost:${PORT}`);
+    });
+}
+
+await startServer().catch(console.error);
 
 //teachers routes
 //get all teachers
-app.get("/teachers", (req, res) => {
+app.get("/teachers", async (req, res) => {
     return res.status(200).json(teachersData);
 });
 
 //get single teacher
-app.get("/teachers/:id", (req, res) => {
+app.get("/teachers/:id", async (req, res) => {
     const id = Number(req.params.id);
     const t = teachersData.find(t => t.id===id);
     if (!t) return res.status(404).json({ error: "Teacher not found" });
@@ -54,7 +76,7 @@ app.get("/teachers/:id", (req, res) => {
 });
 
 //create teacher
-app.post("/teachers", (req, res) => {
+app.post("/teachers", async (req, res) => {
     const { firstName, lastName, email, department, room } = req.body;
     if (!firstName || !lastName || !email || !department) 
         return res.status(400).json({ error: "Missing required fields" });
@@ -73,12 +95,12 @@ app.post("/teachers", (req, res) => {
     }
 
     teachersData.push(newTeacher);
-    saveJson(teachersFilePath, teachersData);
+    await saveJson(teachersCollectionName, teachersData);
     return res.status(201).json(newTeacher);
 });
 
 //update teacher
-app.put("/teachers/:id", (req, res) => {
+app.put("/teachers/:id", async (req, res) => {
     const id = Number(req.params.id);
     const teacher = teachersData.find(t => t.id === id);
     if (!teacher) {
@@ -95,12 +117,12 @@ app.put("/teachers/:id", (req, res) => {
     if (email !== undefined) teacher.email = email;
     if (department !== undefined) teacher.department = department;
     if (room !== undefined) teacher.room = room;
-    saveJson(teachersFilePath, teachersData);
+    await saveJson(teachersCollectionName, teachersData);
     res.json(teacher);
 });
 
 //delete teacher
-app.delete("/teachers/:id", (req, res) => {
+app.delete("/teachers/:id", async (req, res) => {
     const id = Number(req.params.id);
     const assignedToCourse = coursesData.some(c => c.teacherId===id);
     if (assignedToCourse) return res.status(400).json(
@@ -110,18 +132,18 @@ app.delete("/teachers/:id", (req, res) => {
     const index = teachersData.findIndex(t => t.id===id);
     if (index===-1) return res.status(404).json({ error: "Teacher not found" });
     const deleted = teachersData.splice(index, 1)[0];
-    saveJson(teachersFilePath, teachersData);
+    await saveJson(teachersCollectionName, teachersData);
     res.status(200).json(deleted);
 });
 
 //Courses routes
 //get all courses
-app.get("/courses", (req, res) => {
+app.get("/courses", async (req, res) => {
     return res.status(200).json(coursesData);
 });
 
 //get single course
-app.get("/courses/:id", (req, res) => {
+app.get("/courses/:id", async (req, res) => {
     const id = Number(req.params.id);
     const course = coursesData.find(c => c.id===id);
     if (!course) return res.status(404).json({ error: "Course not found "});
@@ -129,7 +151,7 @@ app.get("/courses/:id", (req, res) => {
 });
 
 //create course
-app.post("/courses", (req, res) => {
+app.post("/courses", async (req, res) => {
     const { code, name, teacherId, semester, room, schedule } = req.body;
     if (!code || !name || !teacherId || !semester || !room){
         return res.status(400).json({ error: "Missing required fields" });
@@ -151,12 +173,12 @@ app.post("/courses", (req, res) => {
     };
 
     coursesData.push(newCourse);
-    saveJson(coursesFilePath, coursesData);
+    await saveJson(coursesCollectionName, coursesData);
     return res.status(201).json(newCourse);
 });
 
 //update course
-app.put("/courses/:id", (req, res) => {
+app.put("/courses/:id", async (req, res) => {
     const id = Number(req.params.id);
     const course = coursesData.find(c => c.id === id);
     if (!course) {
@@ -178,12 +200,12 @@ app.put("/courses/:id", (req, res) => {
     if (semester !== undefined) course.semester = semester;
     if (room !== undefined) course.room = room;
     if (schedule !== undefined) course.schedule = schedule;
-    saveJson(coursesFilePath, coursesData);
+    await saveJson(coursesCollectionName, coursesData);
     res.json(course);
 });
 
 //delete course
-app.delete("/courses/:id", (req, res) => {
+app.delete("/courses/:id", async (req, res) => {
     const id = Number(req.params.id);
     const index = coursesData.findIndex(c => c.id===id);
     if (index===-1){
@@ -195,19 +217,19 @@ app.delete("/courses/:id", (req, res) => {
     }
 
     const deleted = coursesData.splice(index, 1)[0];
-    saveJson(coursesFilePath, coursesData);
+    await saveJson(coursesCollectionName, coursesData);
 
     res.status(200).json(deleted);
 });
 
 //students routes
 //get all students
-app.get("/students", (req, res) => {
+app.get("/students", async (req, res) => {
     res.status(200).json(studentsData);
 });
 
 //get single student
-app.get("/students/:id", (req, res) => {
+app.get("/students/:id", async (req, res) => {
     const id = Number(req.params.id);
     const student = studentsData.find(s => s.id===id);
     if (student){
@@ -217,7 +239,7 @@ app.get("/students/:id", (req, res) => {
 });
 
 //create student
-app.post("/students", (req, res) => {
+app.post("/students", async (req, res) => {
     const { firstName, lastName, grade, studentNumber, homeroom, courses } = req.body || {};
     if (!firstName || !lastName || !grade || !studentNumber){
         return res.status(400).json({ error: "Missing required fields "});
@@ -234,12 +256,12 @@ app.post("/students", (req, res) => {
     };
 
     studentsData.push(newStudent);
-    saveJson(studentsFilePath, studentsData);
+    await saveJson(studentsCollectionName, studentsData);
     return res.status(201).json(newStudent);
 });
 
 //update student
-app.put("/students/:id", (req, res) => {
+app.put("/students/:id", async (req, res) => {
     const id = Number(req.params.id);
     const { firstName, lastName, grade, studentNumber, homeroom, courses } = req.body || {};
     if (!firstName && !lastName && !grade && !studentNumber && !homeroom && !courses){
@@ -254,12 +276,12 @@ app.put("/students/:id", (req, res) => {
     ["firstName", "lastName", "grade", "studentNumber", "homeroom", "courses"].forEach(param => {
         studentsData[index][param] = req.body[param] || studentsData[index][param];
     });
-    saveJson(studentsFilePath, studentsData);
+    await saveJson(studentsCollectionName, studentsData);
     return res.status(200).json(studentsData[index]);
 });
 
 //delete student
-app.delete("/students/:id", (req, res) => {
+app.delete("/students/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     const index = studentsData.findIndex(s => s.id===id);
@@ -270,18 +292,18 @@ app.delete("/students/:id", (req, res) => {
     }
 
     const deleted = studentsData.splice(index, 1)[0];
-    saveJson(studentsFilePath, studentsData);
+    await saveJson(studentsCollectionName, studentsData);
     res.status(200).json(deleted);
 });
 
 //tests routes
 //get all tests
-app.get("/tests", (req, res) => {
+app.get("/tests", async (req, res) => {
     res.status(200).json(testsData);
 });
 
 //get single test
-app.get("/tests/:id", (req, res) => {
+app.get("/tests/:id", async (req, res) => {
     const id = Number(req.params.id);
     const test = testsData.find(t => t.id===id);
     if (!test) return res.status(404).json({ error: "Test not found" });
@@ -289,7 +311,7 @@ app.get("/tests/:id", (req, res) => {
 });
 
 //create test
-app.post("/tests", (req, res) => {
+app.post("/tests", async (req, res) => {
     const { studentId, courseId, testName, date, mark, outOf, weight } = req.body;
     if (!studentId || !courseId || !testName || !date || !mark || !outOf) 
         return res.status(400).json({ error: "Missing required fields" });
@@ -314,12 +336,12 @@ app.post("/tests", (req, res) => {
     };
 
     testsData.push(newTest);
-    saveJson(testsFilePath, testsData);
+    await saveJson(testsCollectionName, testsData);
     res.status(201).json(newTest);
 });
 
 //update test
-app.put("/tests/:id", (req, res) => {
+app.put("/tests/:id", async (req, res) => {
     const id = Number(req.params.id);
     const { studentId, courseId, testName, date, mark, outOf, weight } = req.body || {};
     if (!studentId && !courseId && !testName && !date && !mark && !outOf && !weight){
@@ -342,27 +364,27 @@ app.put("/tests/:id", (req, res) => {
     ["studentId", "courseId", "testName", "date", "mark", "outOf", "weight"].forEach(param => {
         testsData[index][param] = req.body[param] || testsData[index][param];
     });
-    saveJson(testsFilePath, testsData);
+    await saveJson(testsCollectionName, testsData);
     return res.status(200).json(testsData[index]);
 });
 
 //delete test
-app.delete("/tests/:id", (req, res) => {
+app.delete("/tests/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     const index = testsData.findIndex(t => t.id===id);
     if (index===-1) return res.status(404).json({ error: "Test not found" });
     const deleted = testsData.splice(index, 1)[0];
-    saveJson(testsFilePath, testsData);
+    await saveJson(testsCollectionName, testsData);
     res.status(200).json(deleted);
 });
 
-const getAllTestByStudent = (req, res) => {
+const getAllTestByStudent = async (req, res) => {
 
 }
 
 //list all tests for specific student
-app.get("/students/:id/tests", (req, res) => {
+app.get("/students/:id/tests", async (req, res) => {
     const id = Number(req.params.id);
     const student = studentsData.find(s => s.id===id);
     if (!student){
@@ -370,20 +392,21 @@ app.get("/students/:id/tests", (req, res) => {
     }
     const tests = testsData.filter(t => t.studentId===student.id);
     if (tests.length===0){
-        return res.status(204);
+        return res.status(204).send();
     }
     return res.status(200).json(tests);
 });
 
-app.get("/students/:id/average", (req, res) => {
+app.get("/students/:id/average", async (req, res) => {
     const id = Number(req.params.id);
     const student = studentsData.find(s => s.id===id);
     if (!student){
         return res.status(404).json({ error: "Student not found" });
     }
+
     const tests = testsData.filter(t => t.studentId===student.id);
     if (tests.length===0){
-        return res.status(204);
+        return res.status(204).send();
     }
 
     //determine averages by:
@@ -401,7 +424,7 @@ app.get("/students/:id/average", (req, res) => {
     );
 });
 
-app.get("/courses/:id/tests", (req, res) => {
+app.get("/courses/:id/tests", async (req, res) => {
     const id = Number(req.params.id);
     const course = coursesData.find(c => c.id===id);
     if (!course)
@@ -409,12 +432,12 @@ app.get("/courses/:id/tests", (req, res) => {
 
     const tests = testsData.filter(t => t.courseId===id);
     if (tests.length===0)
-        return res.status(204);
+        return res.status(204).send();
 
     return res.status(200).json(tests);
 });
 
-app.get("/courses/:id/average", (req, res) => {
+app.get("/courses/:id/average", async (req, res) => {
     const id = Number(req.params.id);
     const course = coursesData.find(c => c.id===id);
     if (!course)
@@ -422,7 +445,7 @@ app.get("/courses/:id/average", (req, res) => {
 
     const tests = testsData.filter(t => t.courseId===id);
     if (tests.length===0)
-        return res.status(204);
+        return res.status(204).send();
 
     return res.status(200).json(
         Math.round(
@@ -433,6 +456,19 @@ app.get("/courses/:id/average", (req, res) => {
         ));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
+app.get("/teachers/:id/summary", async (req, res) => {
+    const id = Number(req.params.id);
+    const t = teachersData.find(t => t.id===id);
+    if (!t) return res.status(404).json({ error: "Teacher not found" });
+    return res.status(200).json({
+        teacherId: id,
+        teacherName: `${t.firstName} ${t.lastName}`,
+        courses: coursesData
+            .filter(c => c.teacherId===id)
+            .map(c => {return {
+                courseId: c.id, 
+                code: c.code, 
+                testCount: testsData.reduce((acc, test) => test.courseId===c.id ? 1 + acc : acc , 0)
+            }})
+    }); 
 });

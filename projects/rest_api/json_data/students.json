@@ -72,5 +72,12 @@
       1,
       3
     ]
+  },
+  {
+    "id": 8,
+    "firstName": "Ian",
+    "lastName": "Luk",
+    "grade": 11,
+    "studentNumber": 12345
   }
 ]
