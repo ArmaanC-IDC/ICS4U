@@ -1,33 +1,12 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { connectDB, getDB, loadJson, saveJson } from "./db.js";
 
-const uri = "mongodb+srv://user:abcdefg@schoolapi.g7m289e.mongodb.net/?appName=SchoolAPI";
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-let db;
-
-const loadJson = async (collectionName) => {
-    return await db.collection(collectionName).find({}).toArray();
-}
-
-const saveJson = async (collectionName, data) => {
-    console.log(collectionName, data);
-    const collection = db.collection(collectionName);
-    await collection.deleteMany({});
-    await collection.insertMany(data);
-}
 
 const teachersCollectionName = "teachers";
 const studentsCollectionName = "students";
@@ -43,6 +22,8 @@ let teachersData;
 let studentsData;
 let testsData;
 let coursesData;
+
+let db;
 
 //teachers routes
 //get all teachers
@@ -457,10 +438,10 @@ app.get("/teachers/:id/summary", async (req, res) => {
 });
 
 async function startServer() {
-    await client.connect();
+    await connectDB();
     console.log("Connected to MongoDB");
 
-    db = client.db("SchoolAPI");
+    db = getDB();
 
     teachersData = await loadJson(teachersCollectionName);
     studentsData = await loadJson(studentsCollectionName);
