@@ -91,7 +91,7 @@ app.delete("/teachers/:id", async (req, res) => {
     if (index===-1) return res.status(404).json({ error: "Teacher not found" });
     const deleted = teachersData.splice(index, 1)[0];
     await saveJson(teachersCollectionName, teachersData);
-    res.status(200).json(deleted);
+    res.status(204).json(deleted);
 });
 
 //Courses routes
@@ -176,7 +176,7 @@ app.delete("/courses/:id", async (req, res) => {
     const deleted = coursesData.splice(index, 1)[0];
     await saveJson(coursesCollectionName, coursesData);
 
-    res.status(200).json(deleted);
+    res.status(204).json(deleted);
 });
 
 //students routes
@@ -251,7 +251,7 @@ app.delete("/students/:id", async (req, res) => {
 
     const deleted = studentsData.splice(index, 1)[0];
     await saveJson(studentsCollectionName, studentsData);
-    res.status(200).json(deleted);
+    res.status(204).json(deleted);
 });
 
 //tests routes
@@ -333,7 +333,7 @@ app.delete("/tests/:id", async (req, res) => {
     if (index===-1) return res.status(404).json({ error: "Test not found" });
     const deleted = testsData.splice(index, 1)[0];
     await saveJson(testsCollectionName, testsData);
-    res.status(200).json(deleted);
+    res.status(204).json(deleted);
 });
 
 const getAllTestByStudent = async (req, res) => {
