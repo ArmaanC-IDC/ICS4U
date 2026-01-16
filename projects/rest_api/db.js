@@ -18,7 +18,7 @@ export async function connectDB() {
   if (!db) {
     await client.connect();
     console.log("Connected to MongoDB");
-    db = client.db("SchoolAPI");
+    db = client.db("SchoolAP");
   }
   return db;
 }
