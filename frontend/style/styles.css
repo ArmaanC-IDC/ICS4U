@@ -1,0 +1,35 @@
+table{
+    width: 500px;
+}
+
+td {
+    border: 1px solid black;
+}
+
+thead {
+    border: 1px solid red;
+    width: 200px;
+}
+
+p{
+    background-color: #e2e2e2;
+}
+ul{
+    background-color: aqua;
+}
+#pink{
+    background-color: pink;
+}
+#blue{
+    background-color: lightblue;
+}
+#paragraph{
+    width: 50%; 
+    margin: auto; 
+    padding: 30px;
+    border: 3px dashed green;
+}
+
+.round{
+    border-radius: 20px;
+}
