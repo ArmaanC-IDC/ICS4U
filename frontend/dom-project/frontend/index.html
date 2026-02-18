@@ -15,6 +15,7 @@
       const table = document.querySelector("#user-table-tbody");
 
       const response = await fetch(SERVER_URL + "/users");
+      console.log(SERVER_URL + "/users");
       const users = await response.json();
 
       table.innerHTML = "";
