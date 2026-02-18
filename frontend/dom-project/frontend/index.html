@@ -7,10 +7,14 @@
   <title>User Records</title>
   <link rel="stylesheet" href="./style.css">
   <script>
+    import "dotenv/config";
+
+    const SERVER_URL = process.env.SERVER_URL;
+
     async function loadUsers() {
       const table = document.querySelector("#user-table-tbody");
 
-      const response = await fetch("http://localhost:3001/users");
+      const response = await fetch(SERVER_URL + "/users");
       const users = await response.json();
 
       table.innerHTML = "";
@@ -39,7 +43,7 @@
 
         const user = Object.fromEntries(formData.entries());
 
-        await fetch("http://localhost:3001/users", {
+        await fetch(SERVER_URL + "/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -58,7 +62,6 @@
     <h1>User Records</h1>
     <p>
       Add a user with the form on the left and display records in the table on the right.
-      <span class="hint">(No JavaScript—form submission requires a server to actually add rows.)</span>
     </p>
   </header>
   <main class="wrap">
@@ -81,7 +84,7 @@
               Full Name *
               <input name="name" type="text" placeholder="e.g., Kevin DesLauriers" required />
             </label>
-            <div class="grid two">
+            <div class="grid">
               <label>
                 Age *
                 <input name="age" type="number" min="0" max="130" placeholder="e.g., 52" required />
@@ -163,7 +166,7 @@
         </table>
       </div>
       <div class="note">
-        For real use, don’t display passwords in plaintext. Store hashed passwords on the server and never render them back.
+        For real use, don't display passwords in plaintext. Store hashed passwords on the server and never render them back.
       </div>
     </section>
   </main>
