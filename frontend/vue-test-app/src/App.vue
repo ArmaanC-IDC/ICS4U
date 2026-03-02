@@ -1,10 +1,13 @@
 <template>
-  <h1>Product: {{ product }}</h1>
-  <h2>Current Cart: {{ cart }}</h2>
-  <button @click="changeCart(1)">Increase Cart</button>
-  <button v-if="cart!==0" @click="changeCart(-1)">Decrease Cart</button>
-  <button v-if="cart!==0" @click="changeCart(-cart)">Reset Cart</button>
+  <h1> {{ title }}</h1>
+  <CartManager 
+    @add-to-cart="addToCart" 
+    @remove-from-cart="removeFromCart"
+    :cart="cart" 
+    :items="items"
+  ></CartManager>
 
+  <br>
   <a :href="url">GOOGLE</a>
   <p v-if="inventory > 10">In Stock</p>
   <p v-else-if="inventory>0">Almost sold out</p>
@@ -21,26 +24,52 @@
     @mouseover="updateImage(variant.image)"
     :class="{selected: image===variant.image}"
   > </div>
+  <br>
   <img :src="image" width="250" :class="{'out-of-stock-img': inventory==0, rounded: true}">
+  <ProductDisplay :premium="premium.value"></ProductDisplay>
+  <ReviewForm @review-submitted="addReview" />
+  <ReviewList :reviews="reviews" />
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import "./styles.css";
+import ProductDisplay from "./ProductDisplay.vue";
+import CartManager from "./CartManager.vue";
+import ReviewForm from './ReviewForm.vue'
+import ReviewList from './ReviewList.vue'
+
+const brand = ref('Vue Mastery')
 const product = ref("Socks");
 const url = ref("https://google.com");
 const inventory = ref(20);
 const details = ref(["50% cotton", "30% wool", "20% polyester"]);
 const variants = ref([
-        {id: 1, color: "red", image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f"},
-        {id: 2, color: "blue", image: "https://ix-marketing.imgix.net/focalpoint.png?auto=format,compress&w=3038"}
+        {id: 1, color: "red", image: "https://i5.walmartimages.com/asr/b75cd313-e19e-4135-9e30-9cf40e2c16f0.b87acbdb3ddeb6f215f3554ebc235765.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF"},
+        {id: 2, color: "blue", image: "https://i5.walmartimages.com/asr/a173af95-5d2a-4a40-8924-4f24d0c3ac9d.db5c01b03633a787f6d7e3b3ea68e574.jpeg"}
       ]);
-const image = ref("https://images.unsplash.com/photo-1512436991641-6745cdb1723f");
-const cart = ref(0);
+const image = ref("https://i5.walmartimages.com/asr/a173af95-5d2a-4a40-8924-4f24d0c3ac9d.db5c01b03633a787f6d7e3b3ea68e574.jpeg");
+const cart = ref([]);
+const onSale = ref(false);
+const premium = ref(false);
+const items = ref([
+  "socks1", "socks2", "socks3", "socks4", "socks5"
+]);
+const reviews = ref([])
 
+function addReview(review) {
+  reviews.value.push(review)
+}
+const title = computed(() => {
+  return brand.value + ' ' + product.value + (onSale.value ? " is on sale" : " is not on sale")
+});
 
-const changeCart = (amt) => {
-  cart.value += amt;
+const addToCart = (id) => {
+  cart.value = [...cart.value, id];
+}
+
+const removeFromCart = (id) => {
+  cart.value = cart.value.filter(c => c!==id);
 }
 
 const updateImage = (newImg) => {
