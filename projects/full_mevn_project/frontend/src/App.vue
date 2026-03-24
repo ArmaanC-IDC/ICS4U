@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
-<template>
-  <HelloWorld />
-</template>
-=======
 <template>
   <div>
     <nav class="navbar is-dark" role="navigation">
@@ -37,4 +28,3 @@ import HelloWorld from './components/HelloWorld.vue'
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 </script>
->>>>>>> 8e431106f564a1cb43d49bee65182193f95700cb
