@@ -3,7 +3,7 @@
     <nav class="navbar is-dark" role="navigation">
       <div class="navbar-brand">
         <a class="navbar-item">
-          <strong>School Admin</strong>
+          <strong>🏫</strong>
         </a>
       </div>
 
