@@ -32,7 +32,11 @@
 
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+<<<<<<< HEAD
 import { isLoading } from './components/loading'
+=======
+const isLoading = ref(false)
+>>>>>>> 5cb0c36136650277ff353cb03337f08de86dec40
 </script>
 
 <style>

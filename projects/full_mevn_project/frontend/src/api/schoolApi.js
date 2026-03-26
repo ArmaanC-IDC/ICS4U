@@ -20,5 +20,6 @@ export const schoolApi = {
   getClass: (id) => http.get(`/classes/${id}`).then(r => r.data),
   createClass: (payload) => http.post('/classes', payload).then(r => r.data),
   updateClass: (id, payload) => http.put(`/classes/${id}`, payload).then(r => r.data),
-  deleteClass: (id) => http.delete(`/classes/${id}`).then(r => r.data)
+  deleteClass: (id) => http.delete(`/classes/${id}`).then(r => r.data),
+  removeStudentFromClass: (classId, studentId) => http.delete(`/classes/${classId}/students/${studentId}`).then(r => r.data)
 }
