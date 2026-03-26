@@ -84,6 +84,25 @@
       </div>
     </div>
   </div>
+  <div class="modal" :class="{ 'is-active': showSuccessModal }">
+    <div class="modal-background" @click="showSuccessModal = false"></div>
+    
+    <div class="modal-content">
+      <div class="box has-text-centered">
+        <h2 class="title is-4">Success!</h2>
+        <p>The student has been added to the database.</p>
+        <button class="button is-success mt-4" @click="showSuccessModal = false">
+          Awesome
+        </button>
+      </div>
+    </div>
+
+    <button 
+      class="modal-close is-large" 
+      aria-label="close" 
+      @click="showSuccessModal = false"
+    ></button>
+  </div>
 </template>
 
 <script setup>
@@ -104,7 +123,9 @@ const form = reactive({
   name: '',
   teacherId: '',
   studentIds: []
-})
+});
+
+let showSuccessModal = ref(false);
 
 async function loadAll() {
   loading.value = true
@@ -148,6 +169,8 @@ async function create() {
     form.teacherId = ''
     form.studentIds = []
     await loadAll()
+
+    showSuccessModal.value = true;
   } catch (e) {
     error.value = e?.response?.data?.message || e.message
   } finally {
