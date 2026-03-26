@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const http = axios.create({
-  baseURL: 'https://ics4u-a-25-26-full-mevn-project-backend.onrender.com',
+  baseURL: 'https://ics4u-a-25-26-full-mevn-project-backend.onrender.com/api',
   timeout: 5000
 })
 
