@@ -1,14 +1,9 @@
 <template>
-  <!-- GLOBAL LOADING BAR -->
-  <progress
-    v-if="isLoading"
-    class="progress is-primary is-small global-loader"
-  ></progress>
   <div>
     <nav class="navbar is-dark" role="navigation">
       <div class="navbar-brand">
         <a class="navbar-item">
-          <strong>🏫</strong>
+          <strong>School Admin</strong>
         </a>
       </div>
 
@@ -32,20 +27,4 @@
 
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-<<<<<<< HEAD
-import { isLoading } from './components/loading'
-=======
-const isLoading = ref(false)
->>>>>>> 5cb0c36136650277ff353cb03337f08de86dec40
 </script>
-
-<style>
-.global-loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 9999;
-  border-radius: 0;
-}
-</style>
