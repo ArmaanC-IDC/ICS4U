@@ -31,9 +31,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-export const isLoading = ref(false)
+import { isLoading } from './components/loading'
 </script>
 
 <style>
