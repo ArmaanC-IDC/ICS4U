@@ -45,6 +45,25 @@ router.put('/:id', async (req, res) => {
   }
 })
 
+// DELETE a student from a class
+router.delete('/:classId/students/:studentId', async (req, res) => {
+  try {
+    const { classId, studentId } = req.params
+
+    const updatedClass = await ClassModel.findByIdAndUpdate(
+      classId,
+      { $pull: { studentIds: studentId } },
+      { new: true }
+    )
+
+    if (!updatedClass) return res.status(404).json({ message: 'Class not found' })
+
+    res.json(updatedClass)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+})
+
 // DELETE class
 router.delete('/:id', async (req, res) => {
   const deleted = await ClassModel.findByIdAndDelete(req.params.id)

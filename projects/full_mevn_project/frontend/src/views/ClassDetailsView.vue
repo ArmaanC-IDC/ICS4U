@@ -15,6 +15,7 @@
       <ul>
         <li v-for="s in cls.studentIds" :key="s._id">
           {{ s.lastName }}, {{ s.firstName }} ({{ s.studentNumber }}) — Grade {{ s.grade }}
+          <button class="button is-small is-danger is-light ml-2" @click="removeStudent(s._id)">Delete</button>
         </li>
       </ul>
 
@@ -36,7 +37,7 @@ const cls = ref(null)
 const loading = ref(false)
 const error = ref('')
 
-onMounted(async () => {
+const loadClass = async () => {
   loading.value = true
   try {
     cls.value = await schoolApi.getClass(props.id)
@@ -45,5 +46,21 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+const removeStudent = async (studentId) => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    await schoolApi.removeStudentFromClass(props.id, studentId)
+    await loadClass()        
+  } catch (e) {
+    error.value = e?.response?.data?.message || e.message
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadClass)
 </script>
