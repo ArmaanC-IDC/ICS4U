@@ -1,9 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-<<<<<<< HEAD
 import { isLoading } from '../components/loading'
-=======
-// import { isLoading } from '../App.vue'
->>>>>>> 5cb0c36136650277ff353cb03337f08de86dec40
 
 const DashboardView = () => import('../views/DashboardView.vue')
 const StudentsView = () => import('../views/StudentsView.vue')
