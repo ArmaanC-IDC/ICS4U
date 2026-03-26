@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isLoading } from '../App.vue'
 
 const DashboardView = () => import('../views/DashboardView.vue')
 const StudentsView = () => import('../views/StudentsView.vue')
@@ -22,6 +23,17 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   }
+})
+
+router.beforeEach((to, from, next) => {
+  isLoading.value = true
+  next()
+})
+
+router.afterEach(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 300)
 })
 
 export default router

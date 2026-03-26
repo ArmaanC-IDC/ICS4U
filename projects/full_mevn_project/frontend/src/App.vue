@@ -1,4 +1,9 @@
 <template>
+  <!-- GLOBAL LOADING BAR -->
+  <progress
+    v-if="isLoading"
+    class="progress is-primary is-small global-loader"
+  ></progress>
   <div>
     <nav class="navbar is-dark" role="navigation">
       <div class="navbar-brand">
@@ -26,5 +31,18 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+export const isLoading = ref(false)
 </script>
+
+<style>
+.global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  border-radius: 0;
+}
+</style>
